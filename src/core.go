@@ -1,25 +1,31 @@
 package main
 
 import (
-  "bufio"
   "fmt"
-  "os"
   "flag"
+  "strings"
+  "errors"
 )
 
-func defineArgs() {
-  // Defines args for the flag package.
-  var humArg = flag.String("i", "null", "Accepts human definition of f/w rule.")
-}
-
-func parseStdIn() {
-  // Parses the user's input.
-  scanner := bufio.NewScanner(os.Stdin)
-  for scanner.Scan(){
-    fmt.Println(scanner.Text())
+// Parses the human's plaintext input.
+func parseStdIn(humArgPtr *string)(int, error) {
+  acceptedVerbs := map[string]bool {
+      "permit": true,
+      "block": true,
+  }
+  if acceptedVerbs[*humArgPtr] {
+      fmt.Println("Accepted Verbs Exist")
+  }
+  else {
+    // Fail Fast
+    return -1, errors.New("Statement does not include an accepted verb.")
   }
 }
 
 func main() {
-  parseStdIn()
+  // Retrieve User Input
+  var humArgPtr = flag.String("i", "null", "Accepts human definition of f/w rule.")
+  flag.Parse()
+
+  parseStdIn(humArgPtr)
 }
