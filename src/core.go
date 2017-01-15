@@ -18,25 +18,40 @@ func parseStdIn(humArgPtr *string)(int, error) {
     "deny": true,
   }
 
+  acceptedFlow :=  map[string]bool {
+    "inbound": true,
+    "outbound": true,
+  }
+
   acceptedProto := map[string]bool {
     "ssh": true,
     "icmp": true,
     "http": true,
+    "https": true,
   }
 
   if acceptedVerbs[strings.ToLower(splitArr[0])] {
-    fmt.Println("debug verb validity check: PASSED")
+    fmt.Println("[DEBUG] verb validity check: PASSED")
   } else {
-    fmt.Println("verb validity check: FAILED")
+    fmt.Println("[DEBUG] verb validity check: FAILED")
     return -1, errors.New("statement contains invalid verb")
   }
-  if acceptedProto[strings.ToLower(splitArr[1])] {
-    fmt.Println("protocol validity check: PASSED")
+
+  if acceptedFlow[strings.ToLower(splitArr[1])] {
+    fmt.Println("[DEBUG] flow validity check: PASSED")
   } else {
-    fmt.Println("protocol validity check: FAILED")
+    fmt.Println("[DEBUG] flow validity check: FAILED")
+    return -1, errors.New("statement contains invalid flow")
+  }
+
+  if acceptedProto[strings.ToLower(splitArr[2])] {
+    fmt.Println("[DEBUG] protocol validity check: PASSED")
+  } else {
+    fmt.Println("[DEBUG] protocol validity check: FAILED")
     return -1, errors.New("statement contains invalid protocol")
   }
-  fmt.Println("isvalidstatement: PASSED")
+
+  fmt.Println("[DEBUG] isvalidstatement: PASSED\n-------------------------------------")
   return 0, nil
 }
 
@@ -49,16 +64,30 @@ func rulesetStringBuilder(humArgPtr *string)(string){
   protoPorts := map[string]string {
     "ssh": "22",
     "http": "80",
-    "https":  "443",
+    "https": "443",
   }
 
-  if strings.Compare(strings.ToLower(splitArr[1]), "icmp") != 0{
-      buf.WriteString(fmt.Sprintf("-A INPUT -p tcp -m --dport %s -j %s", protoPorts[strings.ToLower(splitArr[1])], strings.ToUpper(splitArr[0])))
+  flowMapping := map[string]string {
+    "inbound": "INPUT",
+    "outbound": "OUTPUT",
+  }
+
+  if strings.Compare(strings.ToLower(splitArr[2]), "icmp") != 0 {
+    buf.WriteString(fmt.Sprintf("-A %s -p tcp -m --dport %s -j %s",
+      flowMapping[strings.ToLower(splitArr[1])],
+      protoPorts[strings.ToLower(splitArr[2])],
+      strings.ToUpper(splitArr[0])))
   } else {
     // Handling ICMP
-    buf.WriteString(fmt.Sprintf("-A INPUT -p icmp -m icmp --icmp-type 0 -j %s", strings.ToUpper(splitArr[0])))
-    buf.WriteString(fmt.Sprintf("\n-A INPUT -p icmp -m icmp --icmp-type 3 -j %s", strings.ToUpper(splitArr[0])))
-    buf.WriteString(fmt.Sprintf("\n-A INPUT -p icmp -m icmp --icmp-type 11 -j %s", strings.ToUpper(splitArr[0])))
+    buf.WriteString(fmt.Sprintf("-A %s -p icmp -m icmp --icmp-type 0 -j %s",
+      flowMapping[strings.ToLower(splitArr[1])],
+      strings.ToUpper(splitArr[0])))
+    buf.WriteString(fmt.Sprintf("\n-A %s -p icmp -m icmp --icmp-type 3 -j %s",
+      flowMapping[strings.ToLower(splitArr[1])],
+      strings.ToUpper(splitArr[0])))
+    buf.WriteString(fmt.Sprintf("\n-A %s -p icmp -m icmp --icmp-type 11 -j %s",
+      flowMapping[strings.ToLower(splitArr[1])],
+      strings.ToUpper(splitArr[0])))
   }
   return buf.String()
 }
