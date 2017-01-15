@@ -3,27 +3,44 @@ package main
 import (
   "fmt"
   "flag"
-  "strings"
   "errors"
+  "strings"
 )
 
 // Parses the human's plaintext input.
+// It also validates whether plaintext is valid.
 func parseStdIn(humArgPtr *string)(int, error) {
+  splitArr := strings.Split(*humArgPtr, " ")
+
   acceptedVerbs := map[string]bool {
-      "permit": true,
-      "block": true,
+    "permit": true,
+    "block": true,
   }
-  if acceptedVerbs[*humArgPtr] {
-      fmt.Println("Accepted Verbs Exist")
+
+  acceptedProto := map[string]bool {
+    "ssh": true,
+    "icmp": true,
+    "http": true,
   }
-  else {
-    // Fail Fast
-    return -1, errors.New("Statement does not include an accepted verb.")
+
+  if acceptedVerbs[strings.ToLower(splitArr[0])] {
+      fmt.Println("verb validity check: PASSED")
+  } else {
+    fmt.Println("verb validity check: FAILED")
+    return -1, errors.New("statement contains invalid verb")
   }
+  if acceptedProto[strings.ToLower(splitArr[1])] {
+      fmt.Println("Accepted Protocols Exist")
+  } else {
+    fmt.Println("protocol validity check: FAILED")
+    return -1, errors.New("statement contains invalid protocol")
+  }
+  fmt.Println("valid statement")
+  return 0, nil
 }
 
 func main() {
-  // Retrieve User Input
+  // Defines options for the human
   var humArgPtr = flag.String("i", "null", "Accepts human definition of f/w rule.")
   flag.Parse()
 
