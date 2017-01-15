@@ -15,7 +15,7 @@ func parseStdIn(humArgPtr *string)(int, error) {
 
   acceptedVerbs := map[string]bool {
     "permit": true,
-    "block": true,
+    "deny": true,
   }
 
   acceptedProto := map[string]bool {
@@ -25,7 +25,7 @@ func parseStdIn(humArgPtr *string)(int, error) {
   }
 
   if acceptedVerbs[strings.ToLower(splitArr[0])] {
-    fmt.Println("verb validity check: PASSED")
+    fmt.Println("debug verb validity check: PASSED")
   } else {
     fmt.Println("verb validity check: FAILED")
     return -1, errors.New("statement contains invalid verb")
@@ -49,14 +49,16 @@ func rulesetStringBuilder(humArgPtr *string)(string){
   protoPorts := map[string]string {
     "ssh": "22",
     "http": "80",
+    "https":  "443",
   }
 
-  if strings.Compare(strings.ToLower(splitArr[0]), "permit") == 0 {
-    if strings.Compare(strings.ToLower(splitArr[1]), "icmp") != 0{
-      buf.WriteString(fmt.Sprintf("-A INPUT -p tcp -m --dport %s", protoPorts[strings.ToLower(splitArr[1])]))
-    }
+  if strings.Compare(strings.ToLower(splitArr[1]), "icmp") != 0{
+      buf.WriteString(fmt.Sprintf("-A INPUT -p tcp -m --dport %s -j %s", protoPorts[strings.ToLower(splitArr[1])], strings.ToUpper(splitArr[0])))
   } else {
-    return "unexpected error1."
+    // Handling ICMP
+    buf.WriteString(fmt.Sprintf("-A INPUT -p icmp -m icmp --icmp-type 0 -j %s", strings.ToUpper(splitArr[0])))
+    buf.WriteString(fmt.Sprintf("\n-A INPUT -p icmp -m icmp --icmp-type 3 -j %s", strings.ToUpper(splitArr[0])))
+    buf.WriteString(fmt.Sprintf("\n-A INPUT -p icmp -m icmp --icmp-type 11 -j %s", strings.ToUpper(splitArr[0])))
   }
   return buf.String()
 }
