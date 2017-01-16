@@ -8,6 +8,6 @@ hephaestus
 Hephaestus is a CLI-based firewall ruleset generator built for UNIX/Linux systems running iptables written in Go 1.7.4.
 
 **Usage**
-> $ go build
+> $ go build core.go
 
 > $ ./core -i "(permit|deny) (inbound|outbound) (ssh|icmp|http|https)) 
