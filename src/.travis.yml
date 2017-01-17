@@ -1,0 +1,7 @@
+language: go
+
+go:
+  - 1.7.4
+  - master
+
+script: go test ./tests/core_test_main.go
