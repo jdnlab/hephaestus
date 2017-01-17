@@ -1,5 +1,6 @@
 hephaestus
 ===================
+[![works badge](https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg)](https://github.com/nikku/works-on-my-machine)
 
 >*In Greek mythology, the god of fire, and of the arts which need fire in the execution. He was said to be the son of Zeus and Hera, or (according to Hesiod) of the latter only.*
 
